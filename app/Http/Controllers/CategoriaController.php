@@ -15,9 +15,9 @@ class CategoriaController extends Controller
     {
         try {
             $categorias = Categoria::all();
-            return response()->json(['message' => 'Lista de categorías', 'data' => $categorias], 200);
+            return $this->successResponse('Lista de categorías obtenida exitosamente', $categorias);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Error al obtener la lista de categorías', 'error' => $e->getMessage()], 500);
+            return $this->errorResponse('Error al obtener la lista de categorías', $e, 500);
         }
     }
 
@@ -29,11 +29,11 @@ class CategoriaController extends Controller
             ]);
 
             $categoria = Categoria::create($request->all());
-            return response()->json(['message' => 'Categoría creada exitosamente', 'data' => $categoria], 201);
+            return $this->successResponse('Categoría creada exitosamente', $categoria, 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['message' => 'Error de validación', 'errors' => $e->errors()], 422);
+            return $this->errorResponse('Error de validación', $e, 422);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Error al crear la categoría', 'error' => $e->getMessage()], 500);
+            return $this->errorResponse('Error al crear la categoría', $e, 500);
         }
     }
 
@@ -41,11 +41,11 @@ class CategoriaController extends Controller
     {
         try {
             $categoria = Categoria::findOrFail($id);
-            return response()->json(['message' => 'Categoría obtenida exitosamente', 'data' => $categoria], 200);
+            return $this->successResponse('Categoría obtenida exitosamente', $categoria);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Categoría no encontrada', 'error' => $e->getMessage()], 404);
+            return $this->errorResponse('Categoría no encontrada', $e, 404);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Error al obtener la categoría', 'error' => $e->getMessage()], 500);
+            return $this->errorResponse('Error al obtener la categoría', $e, 500);
         }
     }
 
@@ -58,14 +58,13 @@ class CategoriaController extends Controller
             ]);
 
             $categoria->update($request->all());
-
-            return response()->json(['message' => 'Categoría actualizada exitosamente', 'data' => $categoria], 200);
+            return $this->successResponse('Categoría actualizada exitosamente', $categoria);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Categoría no encontrada', 'error' => $e->getMessage()], 404);
+            return $this->errorResponse('Categoría no encontrada', $e, 404);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['message' => 'Error de validación', 'errors' => $e->errors()], 422);
+            return $this->errorResponse('Error de validación', $e, 422);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Error al actualizar la categoría', 'error' => $e->getMessage()], 500);
+            return $this->errorResponse('Error al actualizar la categoría', $e, 500);
         }
     }
 
@@ -74,11 +73,11 @@ class CategoriaController extends Controller
         try {
             $categoria = Categoria::findOrFail($id);
             $categoria->delete();
-            return response()->json(['message' => 'Categoría eliminada exitosamente'], 200);
+            return $this->successResponse('Categoría eliminada exitosamente');
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Categoría no encontrada', 'error' => $e->getMessage()], 404);
+            return $this->errorResponse('Categoría no encontrada', $e, 404);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Error al eliminar la categoría', 'error' => $e->getMessage()], 500);
+            return $this->errorResponse('Error al eliminar la categoría', $e, 500);
         }
     }
 
@@ -86,9 +85,21 @@ class CategoriaController extends Controller
     {
         try {
             $categoria = Categoria::with('productos')->findOrFail($id);
-            return response()->json(['message' => 'Categoría y lista de productos', 'data' => $categoria], 200);
+            return $this->successResponse('Categoría y lista de productos obtenidos exitosamente', $categoria);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Categoría no encontrada', 'error' => $e->getMessage()], 404);
+            return $this->errorResponse('Categoría no encontrada', $e, 404);
+        } catch (Exception $e) {
+            return $this->errorResponse('Error al obtener la categoría y la lista de productos', $e, 500);
         }
+    }
+
+    private function successResponse($message, $data = null, $statusCode = 200): JsonResponse
+    {
+        return response()->json(['message' => $message, 'data' => $data], $statusCode);
+    }
+
+    private function errorResponse($message, Exception $exception, $statusCode): JsonResponse
+    {
+        return response()->json(['message' => $message, 'error' => $exception->getMessage()], $statusCode);
     }
 }

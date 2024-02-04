@@ -11,13 +11,23 @@ use Illuminate\Validation\Rule;
 
 class MarcaController extends Controller
 {
+    const NACIONAL = 'nacional';
+    const EXTRANJERA = 'extranjera';
+
+    protected $apiResponse;
+
+    public function __construct(ApiResponse $apiResponse)
+    {
+        $this->apiResponse = $apiResponse;
+    }
+
     public function index()
     {
         try {
             $marcas = Marca::all();
-            return ApiResponse::success('Lista de marcas', 200, $marcas);
+            return $this->apiResponse->success('Lista de marcas obtenida exitosamente', 200, $marcas);
         } catch (Exception $e) {
-            return ApiResponse::error('Ocurrió un error al obtener la lista de marcas: ' . $e->getMessage(), 500);
+            return $this->handleException($e, 'Ocurrió un error al obtener la lista de marcas');
         }
     }
 
@@ -26,15 +36,15 @@ class MarcaController extends Controller
         try {
             $request->validate([
                 'nombre' => 'required|unique:marcas',
-                'origen' => 'required|in:nacional,extranjera',
+                'origen' => 'required|in:' . self::NACIONAL . ',' . self::EXTRANJERA,
             ]);
 
             $marca = Marca::create($request->all());
-            return ApiResponse::success('Marca creada exitosamente', 201, $marca);
+            return $this->apiResponse->success('Marca creada exitosamente', 201, $marca);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return ApiResponse::error('Error de validación: ' . $e->getMessage(), 422);
+            return $this->apiResponse->error('Error de validación: ' . $e->getMessage(), 422);
         } catch (Exception $e) {
-            return ApiResponse::error('Error: ' . $e->getMessage(), 500);
+            return $this->handleException($e, 'Error al crear la marca');
         }
     }
 
@@ -42,11 +52,11 @@ class MarcaController extends Controller
     {
         try {
             $marca = Marca::findOrFail($id);
-            return ApiResponse::success('Marca obtenida exitosamente', 200, $marca);
+            return $this->apiResponse->success('Marca obtenida exitosamente', 200, $marca);
         } catch (ModelNotFoundException $e) {
-            return ApiResponse::error('Marca no encontrada: ' . $e->getMessage(), 404);
+            return $this->apiResponse->error('Marca no encontrada: ' . $e->getMessage(), 404);
         } catch (Exception $e) {
-            return ApiResponse::error('Error: ' . $e->getMessage(), 500);
+            return $this->handleException($e, 'Error al obtener la marca');
         }
     }
 
@@ -56,17 +66,17 @@ class MarcaController extends Controller
             $marca = Marca::findOrFail($id);
             $request->validate([
                 'nombre' => ['required', Rule::unique('marcas')->ignore($marca)],
-                'origen' => 'required|in:nacional,extranjera',
+                'origen' => 'required|in:' . self::NACIONAL . ',' . self::EXTRANJERA,
             ]);
 
             $marca->update($request->all());
-            return ApiResponse::success('Marca actualizada exitosamente', 200, $marca);
+            return $this->apiResponse->success('Marca actualizada exitosamente', 200, $marca);
         } catch (ModelNotFoundException $e) {
-            return ApiResponse::error('Marca no encontrada: ' . $e->getMessage(), 404);
+            return $this->apiResponse->error('Marca no encontrada: ' . $e->getMessage(), 404);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return ApiResponse::error('Error de validación: ' . $e->getMessage(), 422);
+            return $this->apiResponse->error('Error de validación: ' . $e->getMessage(), 422);
         } catch (Exception $e) {
-            return ApiResponse::error('Error: ' . $e->getMessage(), 500);
+            return $this->handleException($e, 'Error al actualizar la marca');
         }
     }
 
@@ -75,11 +85,11 @@ class MarcaController extends Controller
         try {
             $marca = Marca::findOrFail($id);
             $marca->delete();
-            return ApiResponse::success('Marca eliminada exitosamente', 200);
+            return $this->apiResponse->success('Marca eliminada exitosamente', 200);
         } catch (ModelNotFoundException $e) {
-            return ApiResponse::error('Marca no encontrada', 404);
+            return $this->apiResponse->error('Marca no encontrada', 404);
         } catch (Exception $e) {
-            return ApiResponse::error('Error: ' . $e->getMessage(), 500);
+            return $this->handleException($e, 'Error al eliminar la marca');
         }
     }
 
@@ -87,11 +97,17 @@ class MarcaController extends Controller
     {
         try {
             $marca = Marca::with('productos')->findOrFail($id);
-            return ApiResponse::success('Marca y lista de productos', 200, $marca);
+            return $this->apiResponse->success('Marca y lista de productos obtenidos exitosamente', 200, $marca);
         } catch (ModelNotFoundException $e) {
-            return ApiResponse::error('Marca no encontrada: ' . $e->getMessage(), 404);
+            return $this->apiResponse->error('Marca no encontrada: ' . $e->getMessage(), 404);
         } catch (Exception $e) {
-            return ApiResponse::error('Error: ' . $e->getMessage(), 500);
+            return $this->handleException($e, 'Error al obtener la marca y la lista de productos');
         }
     }
+
+    private function handleException(Exception $e, $errorMessage)
+    {
+        return $this->apiResponse->error($errorMessage . ': ' . $e->getMessage(), 500);
+    }
 }
+

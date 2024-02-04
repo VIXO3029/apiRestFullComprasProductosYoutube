@@ -12,6 +12,10 @@ use Illuminate\Validation\ValidationException;
 
 class ProductoController extends Controller
 {
+    // Definir constantes para los valores "nacional" y "extranjera"
+    const NACIONAL = 'nacional';
+    const EXTRANJERA = 'extranjera';
+
     public function index()
     {
         try {
@@ -31,7 +35,7 @@ class ProductoController extends Controller
                 'cantidad_disponible' => 'required|integer',
                 'categoria_id' => 'required|exists:categorias,id',
                 'marca_id' => 'required|exists:marcas,id',
-                'categoria_origen' => 'required|in:nacional,extranjera',
+                'categoria_origen' => 'required|in:' . self::NACIONAL . ',' . self::EXTRANJERA,
             ]);
 
             $producto = Producto::create($request->all());
@@ -70,7 +74,7 @@ class ProductoController extends Controller
                 'cantidad_disponible' => 'required|integer',
                 'categoria_id' => 'required|exists:categorias,id',
                 'marca_id' => 'required|exists:marcas,id',
-                'categoria_origen' => 'required|in:nacional,extranjera',
+                'categoria_origen' => 'required|in:' . self::NACIONAL . ',' . self::EXTRANJERA,
             ]);
 
             $producto->update($request->all());
