@@ -9,12 +9,26 @@ class Compra extends Model
 {
     use HasFactory;
 
+    /**
+     * Los atributos que pueden ser asignados en masa.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'subtotal', 'total'
+        'subtotal', 'total',
     ];
 
-    public function productos() // Una Compra puede pertenecer a varias instancias de Producto y viceversa.
+    /**
+     * Define la relación muchos a muchos con Producto a través de la tabla pivot.
+     *
+     * Una Compra puede tener varios Productos y viceversa.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function productos()
     {
-        return $this->belongsToMany(Producto::class)->withPivot('precio', 'cantidad', 'subtotal')->withTimestamps();
+        return $this->belongsToMany(Producto::class)
+            ->withPivot(['precio', 'cantidad', 'subtotal'])
+            ->withTimestamps();
     }
 }

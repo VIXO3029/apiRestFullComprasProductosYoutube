@@ -9,22 +9,44 @@ class Producto extends Model
 {
     use HasFactory;
 
+    /**
+     * Los atributos que pueden ser asignados en masa.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'nombre', 'descripcion', 'precio', 'cantidad_disponible', 'categoria_id', 'marca_id'
+        'nombre', 'descripcion', 'precio', 'cantidad_disponible', 'categoria_id', 'marca_id',
     ];
 
-    public function categoria() // Un Producto pertenece a una única Categoría.
+    /**
+     * Establece la relación muchos a uno con la tabla de categorías.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function categoria()
     {
         return $this->belongsTo(Categoria::class);
     }
 
-    public function marca() // Un Producto pertenece a una única Marca.
+    /**
+     * Establece la relación muchos a uno con la tabla de marcas.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function marca()
     {
         return $this->belongsTo(Marca::class);
     }
 
-    public function compras() // Un Producto puede pertenecer a varias instancias de Compra y viceversa.
+    /**
+     * Establece la relación muchos a muchos con la tabla de compras.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function compras()
     {
-        return $this->belongsToMany(Compra::class)->withPivot('precio', 'cantidad', 'subtotal')->withTimestamps();
+        return $this->belongsToMany(Compra::class)
+            ->withPivot('precio', 'cantidad', 'subtotal')
+            ->withTimestamps();
     }
 }

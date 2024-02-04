@@ -9,11 +9,23 @@ class Marca extends Model
 {
     use HasFactory;
 
+    /**
+     * Los atributos que pueden ser asignados en masa.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'nombre','descripcion'
+        'nombre', 'descripcion', 'origen',
     ];
 
-    public function productos() // Una Marca puede tener muchos productos asociados.
+    /**
+     * Establece la relación uno a muchos con la tabla de productos.
+     *
+     * Una Marca puede tener muchos productos asociados.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function productos()
     {
         return $this->hasMany(Producto::class);
     }
